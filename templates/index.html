@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HCV Prediction Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+        .form-card {
+            background: #ffffff;
+        }
+        .result-card {
+            background: #e8f4fc;
+        }
+        .btn-primary {
+            background: #3498db;
+            border: none;
+            padding: 12px 20px;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        .result-positive {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .result-negative {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .feature-importance {
+            height: 300px;
+        }
+        .required {
+            color: #e74c3c;
+        }
+        .recommendation {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .code-container {
+            background: #2c3e50;
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        pre {
+            color: #ecf0f1;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header py-3 mb-4">
+        <div class="container">
+            <h1 class="text-center">Hepatitis C Virus (HCV) Prediction Tool</h1>
+            <p class="text-center mb-0">Analyze patient data to predict HCV infection risk</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card form-card p-4">
+                    <h3 class="mb-4">Patient Data Input</h3>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Upload Dataset (CSV)</label>
+                        <input class="form-control" type="file" id="fileUpload" accept=".csv">
+                        <div class="form-text">Upload a CSV file with patient data or enter values manually below</div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5 class="mb-3">Or Enter Values Manually</h5>
+                    
+                    <form id="hcvForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="age" class="form-label">Age <span class="required">*</span></label>
+                                <input type="number" class="form-control" id="age" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="sex" class="form-label">Sex <span class="required">*</span></label>
+                                <select class="form-select" id="sex" required>
+                                    <option value="">Select</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="alb" class="form-label">Albumin (ALB) <span class="required">*</span></label>
+                                <input type="number" step="0.1" class="form-control" id="alb" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="alp" class="form-label">Alkaline Phosphatase (ALP) <span class="required">*</span></label>
+                                <input type="number" class="form-control" id="alp" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="alt" class="form-label">Alanine Aminotransferase (ALT) <span class="required">*</span></label>
+                                <input type="number" class="form-control" id="alt" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="ast" class="form-label">Aspartate Aminotransferase (AST) <span class="required">*</span></label>
+                                <input type="number" class="form-control" id="ast" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="bil" class="form-label">Bilirubin (BIL) <span class="required">*</span></label>
+                                <input type="number" step="0.1" class="form-control" id="bil" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="che" class="form-label">Cholinesterase (CHE) <span class="required">*</span></label>
+                                <input type="number" step="0.1" class="form-control" id="che" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="chol" class="form-label">Cholesterol (CHOL) <span class="required">*</span></label>
+                                <input type="number" step="0.1" class="form-control" id="chol" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="crea" class="form-label">Creatinine (CREA) <span class="required">*</span></label>
+                                <input type="number" step="0.1" class="form-control" id="crea" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="ggt" class="form-label">Gamma-Glutamyl Transferase (GGT) <span class="required">*</span></label>
+                                <input type="number" class="form-control" id="ggt" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="prot" class="form-label">Protein (PROT) <span class="required">*</span></label>
+                                <input type="number" step="0.1" class="form-control" id="prot" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mt-3">Predict HCV</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card result-card p-4">
+                    <h3 class="mb-4">Prediction Results</h3>
+                    
+                    <div class="text-center py-4">
+                        <div id="initialMessage">
+                            <i class="fas fa-microscope fa-4x text-secondary mb-3"></i>
+                            <h5>Submit patient data to get prediction results</h5>
+                        </div>
+                        
+                        <div id="results" style="display: none;">
+                            <h4 class="mb-3">HCV Prediction: <span id="predictionResult"></span></h4>
+                            <div class="probability-display mb-4">
+                                <h5>Probability: <span id="probabilityValue"></span></h5>
+                                <div class="progress" style="height: 25px;">
+                                    <div id="probabilityBar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation mb-4">
+                                <h5>Recommendation</h5>
+                                <p id="recommendationText" class="mb-0"></p>
+                            </div>
+                            
+                            <div class="feature-importance">
+                                <h5>Feature Importance</h5>
+                                <canvas id="featureChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="code-container">
+            <h4 class="text-white mb-3">Typical HTML Structure for an HCV Prediction Tool</h4>
+            <pre>
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;HCV Prediction Tool&lt;/title&gt;
+    &lt;!-- Bootstrap CSS --&gt;
+    &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+    &lt;!-- Chart.js for visualizations --&gt;
+    &lt;script src="https://cdn.jsdelivr.net/npm/chart.js"&gt;&lt;/script&gt;
+    &lt;style&gt;
+        /* Custom CSS styles */
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+        }
+        /* Additional styles would be here */
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="header"&gt;
+        &lt;div class="container"&gt;
+            &lt;h1&gt;Hepatitis C Virus (HCV) Prediction Tool&lt;/h1&gt;
+            &lt;p&gt;Analyze patient data to predict HCV infection risk&lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="container"&gt;
+        &lt;div class="row"&gt;
+            &lt;div class="col-lg-6"&gt;
+                &lt;!-- Input form would be here --&gt;
+                &lt;form id="hcvForm"&gt;
+                    &lt;div class="form-group"&gt;
+                        &lt;label for="age"&gt;Age&lt;/label&gt;
+                        &lt;input type="number" class="form-control" id="age" required&gt;
+                    &lt;/div&gt;
+                    &lt;!-- More form fields --&gt;
+                    &lt;button type="submit" class="btn btn-primary"&gt;Predict HCV&lt;/button&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+            
+            &lt;div class="col-lg-6"&gt;
+                &lt;!-- Results display would be here --&gt;
+                &lt;div id="results"&gt;
+                    &lt;h4&gt;HCV Prediction: &lt;span id="predictionResult"&gt;&lt;/span&gt;&lt;/h4&gt;
+                    &lt;div class="probability-display"&gt;
+                        &lt;h5&gt;Probability: &lt;span id="probabilityValue"&gt;&lt;/span&gt;&lt;/h5&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        // JavaScript code would handle form submission
+        document.getElementById('hcvForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Process form data and display results
+        });
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+            </pre>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <h4>How to Check Your Existing HTML File</h4>
+                <p>To see what code your existing HTML file contains:</p>
+                <ol>
+                    <li>Right-click on your HTML file</li>
+                    <li>Select "Open with" and choose a text editor (VSCode, Notepad++, etc.)</li>
+                    <li>Examine the code structure - it should contain HTML, CSS, and JavaScript</li>
+                    <li>Look for form elements, result display areas, and any JavaScript functionality</li>
+                </ol>
+                
+                <p>If you'd like me to help you modify or improve your existing HTML file, please share the code with me!</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-4 mt-4">
+        <div class="container">
+            <p class="mb-0">HCV Prediction Tool &copy; 2023 | For educational purposes only</p>
+            <p class="mb-0">Not intended for actual medical diagnosis</p>
+        </div>
+    </footer>
+
+    <script>
+        // Simulate form submission
+        document.getElementById('hcvForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            simulatePrediction();
+        });
+
+        // Simulate prediction results
+        function simulatePrediction() {
+            // Show loading state
+            document.getElementById('initialMessage').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            // Simulate processing delay
+            setTimeout(function() {
+                // Generate random result for simulation
+                const isPositive = Math.random() > 0.5;
+                const probability = (Math.random() * 0.4 + (isPositive ? 0.6 : 0.2)).toFixed(2);
+                
+                // Update results
+                document.getElementById('predictionResult').textContent = isPositive ? 'Positive' : 'Negative';
+                document.getElementById('predictionResult').className = isPositive ? 'result-positive' : 'result-negative';
+                document.getElementById('probabilityValue').textContent = (probability * 100).toFixed(1) + '%';
+                document.getElementById('probabilityBar').style.width = (probability * 100) + '%';
+                document.getElementById('probabilityBar').className = isPositive ? 
+                    'progress-bar bg-danger' : 'progress-bar bg-success';
+                
+                // Update recommendation
+                document.getElementById('recommendationText').textContent = isPositive ?
+                    'Recommend consultation with a hepatologist for further testing and possible treatment options.' :
+                    'No immediate action required. Maintain regular health check-ups.';
+                
+                // Update feature importance chart
+                updateFeatureChart();
+            }, 1000);
+        }
+
+        // Create feature importance chart
+        function updateFeatureChart() {
+            const ctx = document.getElementById('featureChart').getContext('2d');
+            
+            // Sample data for demonstration
+            const features = ['ALT', 'AST', 'BIL', 'ALB', 'GGT', 'AGE', 'PROT', 'CHE', 'CHOL', 'ALP'];
+            const importance = features.map(() => Math.random() * 10);
+            
+            // Sort by importance
+            const combined = features.map((f, i) => ({feature: f, importance: importance[i]}));
+            combined.sort((a, b) => b.importance - a.importance);
+            
+            const sortedFeatures = combined.map(item => item.feature);
+            const sortedImportance = combined.map(item => item.importance);
+            
+            if (window.featureChartInstance) {
+                window.featureChartInstance.destroy();
+            }
+            
+            window.featureChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedFeatures,
+                    datasets: [{
+                        label: 'Feature Importance',
+                        data: sortedImportance,
+                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Importance'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize a blank chart on page load
+        window.featureChartInstance = null;
+        window.onload = function() {
+            const ctx = document.getElementById('featureChart').getContext('2d');
+            window.featureChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Feature Importance',
+                        data: [],
+                        backgroundColor: 'rgba(52, 152, 219, 0.7)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        };
+    </script>
+</body>
+</html>
